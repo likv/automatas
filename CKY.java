@@ -66,17 +66,17 @@ public class CKY{
     }
 
     public String[][] generateCKY(String[][] ckyTable){
-        //Step 1: Fill header row
+        //Paso 1: llenamos la tabla
         for(int i = 0; i < ckyTable[0].length; i++){
             ckyTable[0][i] = this.manageWord(word, i);
         }
-        //Step 2: Get productions for terminals
+        //Paso 2: obtenemos las producciones para los terminales
         for(int i = 0; i < ckyTable[1].length; i++){
             String[] validCombinations = this.checkIfProduces(new String[] {ckyTable[0][i]});
             ckyTable[1][i] = this.toString(validCombinations);
         }
         if(word.length() <= 1) { return ckyTable; }
-        //Step 3: Get productions for subwords with the length of 2
+        //Paso 3: Obtenemos las producciones para las subcadenas de longitud 2
         for(int i = 0; i < ckyTable[2].length; i++){
             String[] downwards = this.toArray(ckyTable[1][i]);
             String[] diagonal = this.toArray(ckyTable[1][i+1]);
@@ -84,7 +84,7 @@ public class CKY{
             ckyTable[2][i] = this.toString(validCombinations);
         }
         if(word.length() <= 2){ return ckyTable; }
-        //Step 3: Get productions for subwords with the length of n
+        //Paso 3: Obtenemos las producciones para las subcadenas de longitud n
         TreeSet<String> currentValues = new TreeSet<String>();
 
         for(int i = 3; i < ckyTable.length; i++){
@@ -160,7 +160,7 @@ public class CKY{
         String formatString = "| %-" + l + "s ";
         String s = "";
         StringBuilder sb = new StringBuilder();
-        //Building Table Structure Modules
+        //Construimos la tabla
         sb.append("+");
         for(int x = 0; x <= l + 2; x++){
             if(x == l + 2){ 
@@ -172,7 +172,7 @@ public class CKY{
         String low = sb.toString();
         sb.delete(0, 1);
         String lowRight = sb.toString();
-        //Print Table
+        //Imprimimos la tabla
         for(int i = 0; i < ckyTable.length; i++){
             for(int j = 0; j <= ckyTable[i].length; j++){
                 System.out.print((j == 0) ? low : (i <= 1 && j == ckyTable[i].length - 1) ? "" : lowRight);
@@ -186,7 +186,7 @@ public class CKY{
             System.out.println();
         }
         System.out.println(low+"\n");
-        //Step 4: Evaluate success.
+        //Paso 4: Revisamos si está el símbolo inicial,para evaluar si la cadena puede ser generada por la gramática
         if(ckyTable[ckyTable.length-1][ckyTable[ckyTable.length-1].length-1].contains(this.startingSymbol)){
             System.out.println("The word \"" + this.word + "\" is an element of the CFG G and can be derived from it.");
         }else{
