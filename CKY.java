@@ -26,26 +26,32 @@ public class CKY{
     public void parseGrammar(){
         Scanner input = this.openFile();
         ArrayList<String> tmp = new ArrayList<>();
-        int line = 2;
-
-        startingSymbol = input.next();
-        input.nextLine();
-
-        while(input.hasNextLine() && line <= 3){
-            tmp.addAll(Arrays.<String>asList(this.toArray(input.nextLine())));
-            if(line == 2) { this.terminals.addAll(tmp); }
-            if(line == 3) { this.nonTerminals.addAll(tmp); }
-            tmp.clear();
-            line++;
-        }
-
+        int numline = 0;
         while(input.hasNextLine()){
-            tmp.addAll(Arrays.<String>asList(this.toArray(input.nextLine())));
+            String line = input.nextLine();
+            line = line.replace("->", " ");
+            line = line.replace("|", " ");
+            tmp.addAll(Arrays.<String>asList(this.toArray(line)));
             String leftSide = tmp.get(0);
+            if(numline == 0){
+                this.startingSymbol = leftSide;
+            }
             tmp.remove(0);
+            for(String i:tmp){
+                if(Character.isLowerCase(i.charAt(0)) && !terminals.contains(i)){
+                    terminals.add(i);
+                }else{
+                    for(int j=0;j<i.length();j++){
+                        if(Character.isUpperCase(i.charAt(j)) && !nonTerminals.contains(String.valueOf(i.charAt(j)))){
+                            nonTerminals.add(String.valueOf(i.charAt(j)));
+                        }
+                    }
+                }
+            }
             this.grammar.put(leftSide, new ArrayList<>());
             this.grammar.get(leftSide).addAll(tmp);
             tmp.clear();
+            numline++;
         }
         input.close();
     }
@@ -144,14 +150,14 @@ public class CKY{
     }
 
     public void printResult (String[][] ckyTable){
-        System.out.println("Word: " + this.word);
+        System.out.println("Cadena: " + this.word);
         System.out.println("\nG = (" + this.terminals.toString().replace("[", "{").replace("]", "}") 
                           + ", " + this.nonTerminals.toString().replace("[", "{").replace("]", "}")
-                          + ", " + this.startingSymbol + ")\n\nWith Productions P as:");
+                          + ", " + this.startingSymbol + ")\n\nProducciones P:");
         for(String s: grammar.keySet()){
             System.out.println(s + " -> " + this.grammar.get(s).toString().replaceAll("[\\[\\]\\,]", "").replaceAll("\\s", " | "));
         }
-        System.out.println("\nApplying CKY-Algorithm:\n");
+        System.out.println("\nAplicando CKY:\n");
         this.drawTable(ckyTable);
     }
 
@@ -186,11 +192,11 @@ public class CKY{
             System.out.println();
         }
         System.out.println(low+"\n");
-        //Paso 4: Revisamos si está el símbolo inicial,para evaluar si la cadena puede ser generada por la gramática
+        //Paso 4: Revisamos si esta el simbolo inicial,para evaluar si la cadena puede ser generada por la gramatica
         if(ckyTable[ckyTable.length-1][ckyTable[ckyTable.length-1].length-1].contains(this.startingSymbol)){
-            System.out.println("The word \"" + this.word + "\" is an element of the CFG G and can be derived from it.");
+            System.out.println("La cadena \"" + this.word + "\" es elemento de la gramatica y puede ser generada a partir de esta esta");
         }else{
-            System.out.println("The word \"" + this.word + "\" is not an element of the CFG G and can not be derived from it.");
+            System.out.println("La cadena \"" + this.word + "\" no es elemento de la gramatica y no puede ser generada a partir de esta");
         }
     }
 
@@ -208,7 +214,7 @@ public class CKY{
         try{
             return new Scanner(new File(this.filename));
         }catch(FileNotFoundException e){
-            System.out.println("Error: Can't find or open the file: " + this.filename + ".");
+            System.out.println("Error: No se puede abrir el archivo: " + this.filename + ".");
             System.exit(1);
             return null;
         }
